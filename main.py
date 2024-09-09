@@ -19,14 +19,19 @@ app.add_middleware(
 )
 
 
-history_id = 0
-
-
-def ServerDelay():
-    delay = random.uniform(0, 2)
+def ServerDelay(delay=random.uniform(1, 3)):
+    # delay = 3
     print(f"서버가 {delay}초 뒤에 응답합니다.")
     time.sleep(delay)
 
+# 연혁 ===================================================================================================
+# ========================================================================================================
+history_id = 0
+
+class HistoryEntity(BaseModel):
+    year: int
+    month: int
+    content: str
 
 def GenerateHistories(year: int, month: int, content: str):
     global history_id
@@ -60,12 +65,6 @@ sampleHistoryData = [
 async def return_all_histories():
     ServerDelay()
     return sampleHistoryData
-
-
-class HistoryEntity(BaseModel):
-    year: int
-    month: int
-    content: str
     
 
 @app.post("/histories")
@@ -85,3 +84,78 @@ async def delete_history(id: int):
     ServerDelay()
     sampleHistoryData = [history for history in sampleHistoryData if history["id"] != id]
     return sampleHistoryData
+# ========================================================================================================
+
+
+
+# 관리자 =================================================================================================
+# ========================================================================================================
+class AdminEntity(BaseModel):
+    student_id: str
+    generation: int
+    role: str
+    description: str
+
+class AdminUpdateEntity(BaseModel):
+    generation: int
+    role: str
+    description: str
+
+def GenerateAdmin(student_id: str, generation: int, role: str, description: str):
+    admin = {
+        "student_id": student_id,  
+        "generation": generation, 
+        "role": role,
+        "description": description,
+        "created_at": datetime.now(),
+        "updated_at": datetime.now()
+    }
+    return admin
+
+
+sampleAdminList = [
+    GenerateAdmin("2020000000", 20, "최고 관리자", "최고 관리자임 ㅇㅇ"),
+    GenerateAdmin("2021000000", 21, "기술 관리자", "기술 관리자임 ㅇㅇ"),
+    GenerateAdmin("2022000000", 22, "홍보 관리자", "홍보 관리자임 ㅇㅇ"),
+    GenerateAdmin("2023000000", 23, "학술 관리자", "학술 관리자임 ㅇㅇ"),
+    GenerateAdmin("2024000000", 24, "운영 관리자", "운영 관리자임 ㅇㅇ"),
+    GenerateAdmin("2025000000", 25, "대외 관리자", "대외 관리자임 ㅇㅇ"),
+    GenerateAdmin("2030000000", 30, "기타 관리자", "그냥 의미없는 관리자임 ㅇㅇ")
+]
+
+@app.get("/admin")
+async def return_all_admins():
+    ServerDelay()
+    return sampleAdminList
+    
+@app.post("/admin")
+async def add_admin(res: AdminEntity):
+    global sampleAdminList
+
+    ServerDelay()
+    newAdmin = GenerateAdmin(res.student_id, res.generation, res.role, res.description)
+    sampleAdminList.append(newAdmin)
+    return newAdmin
+
+@app.put("/admin/{student_id}")
+async def update_admin(student_id: str, res: AdminUpdateEntity):
+    for admin in sampleAdminList:
+        if admin['student_id'] == student_id:
+            if res.generation is not None:
+                admin['generation'] = res.generation
+            if res.role is not None:
+                admin['role'] = res.role
+            if res.description is not None:
+                admin['description'] = res.description
+            admin['updated_at'] = datetime.now()
+            return admin
+    return None  # 해당 student_id가 없을 경우
+
+@app.delete("/admin/{student_id}")
+async def delete_admin(student_id: str):
+    global sampleAdminList
+
+    ServerDelay()
+    sampleAdminList = [admin for admin in sampleAdminList if admin["student_id"] != student_id]
+    return sampleAdminList
+# ========================================================================================================
