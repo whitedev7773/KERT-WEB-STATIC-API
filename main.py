@@ -23,7 +23,7 @@ app.add_middleware(
 )
 
 # await ServerDelay()로 사용
-async def ServerDelay(delay=random.uniform(1, 3)):
+async def ServerDelay(delay=random.uniform(1, 2)):
     print(f"서버가 {round(delay, 3)}초 뒤에 응답합니다.")
     await asyncio.sleep(delay)  # Intentional delay of 1 second
 
@@ -65,7 +65,7 @@ class Password(BaseModel):
     updated_at: Optional[datetime] = datetime.now()
 
 class History(BaseModel):
-    id: int
+    id: Optional[int] = None
     year: int
     month: int
     description: str
@@ -73,7 +73,32 @@ class History(BaseModel):
     updated_at: Optional[datetime] = datetime.now()
 
 # In-memory data storage
-admins = []
+admins = [
+    Admin(
+        student_id=2024005056,
+        generation="2024.1",
+        role="구경꾼1",
+        description="돈 많은 백수가 될래요"
+    ),
+    Admin(
+        student_id=2024005057,
+        generation="2024.1",
+        role="구경꾼2",
+        description="돈 많은 백수가 될래요"
+    ),
+    Admin(
+        student_id=2024005058,
+        generation="2024.1",
+        role="구경꾼3",
+        description="돈 많은 백수가 될래요"
+    ),
+    Admin(
+        student_id=21700000000,
+        generation="2024.1",
+        role="메이플스토리 디렉터",
+        description="x발 그냥 다 해줬잖아"
+    ),
+]
 users = [
     User(
         student_id=2024005056,
@@ -86,32 +111,64 @@ users = [
     User(
         student_id=2024005057,
         name="장기원",
-        email="w.developer7773@gmail.com",
-        profile_picture="https://github.com/whitedev7773.png",
+        email="jkw04257773@gmail.com",
+        profile_picture="",
         generation="2024.1",
         major="컴퓨터학부 플랫폼SW/데이터전공"
     ),
     User(
         student_id=2024005058,
         name="장기원",
-        email="w.developer7773@gmail.com",
+        email="whitedev7773@gmail.com",
         profile_picture="https://github.com/whitedev7773.png",
         generation="2024.1",
         major="컴퓨터학부 플랫폼SW/데이터전공"
     ),
     User(
-        student_id=2024005059,
-        name="장기원",
-        email="w.developer7773@gmail.com",
-        profile_picture="https://github.com/whitedev7773.png",
+        student_id=21700000000,
+        name="신창섭",
+        email="sample@gmail.com",
+        profile_picture="https://i1.sndcdn.com/avatars-xh80NhoKyDQxTmWG-lPgMhQ-t240x240.jpg",
         generation="2024.1",
-        major="컴퓨터학부 플랫폼SW/데이터전공"
+        major="넥슨"
     ),
 ]
 posts = []
 comments = []
 passwords = []
-histories = []
+histories = [
+    History(
+        id=0,
+        year=2024,
+        month=3,
+        description="장기원의 KERT 가입"
+    ),
+    History(
+        id=1,
+        year=2005,
+        month=6,
+        description="장기원의 생일"
+    ),
+    History(
+        id=2,
+        year=2021,
+        month=3,
+        description="고등학교 1학년 장기원"
+    ),
+    History(
+        id=3,
+        year=2024,
+        month=1,
+        description="20살의 장기원"
+    ),
+    History(
+        id=4,
+        year=2024,
+        month=1,
+        description="20살의 장기원2"
+    ),
+]
+history_id = 4
 
 # Helper functions
 def find_item_by_id(collection, item_id, id_field='id'):
@@ -245,12 +302,15 @@ async def delete_post(id: int):
 # CRUD for History
 @app.post("/histories", response_model=History)
 async def create_history(history: History):
+    global history_id
     await ServerDelay()
+    history_id += 1
+    history.id = history_id
     histories.append(history)
     return history
 
 @app.get("/histories", response_model=List[History])
-async def get_history(id: int):
+async def get_all_history():
     await ServerDelay()
     return histories
 
